@@ -1,0 +1,4 @@
+DATA_PATH = 'data/EEG_data.csv'
+RANDOM_STATE = 42
+N_SPLITS = 10
+TOP_FEATURES = 20
