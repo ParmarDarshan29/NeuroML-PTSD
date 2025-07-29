@@ -1,4 +1,4 @@
-Mean AUC: 0.8240
-Std AUC: 0.1326
+Mean AUC: 0.7947
+Std AUC: 0.1355
 Model: RandomForest
-Params: {'n_estimators': 199, 'max_depth': 28, 'min_samples_split': 3, 'min_samples_leaf': 2}
+Params: {'n_estimators': 53, 'max_depth': 50, 'min_samples_split': 6, 'min_samples_leaf': 4}

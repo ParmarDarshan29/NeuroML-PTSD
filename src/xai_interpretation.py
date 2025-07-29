@@ -1,79 +1,96 @@
 import shap
-import lime
-import lime.lime_tabular
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.inspection import permutation_importance
-from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import ElasticNetCV
+import seaborn as sns
 
-def explain_with_shap(model, X_train, X_test, plot_type="summary", max_display=20):
-    """SHAP explanation: summary or bar plot"""
-    explainer = shap.Explainer(model, X_train)
-    shap_values = explainer(X_test)
-    
-    if plot_type == "summary":
-        shap.plots.beeswarm(shap_values, max_display=max_display)
-    elif plot_type == "bar":
-        shap.plots.bar(shap_values, max_display=max_display)
+def explain_with_shap(model, X_train, X_test, save_path="results/shap_summary.png"):
+    model_name = model.__class__.__name__.lower()
+
+    if "xgb" in model_name or "catboost" in model_name or "lgbm" in model_name:
+        explainer = shap.Explainer(model, X_train)
+    elif "rf" in model_name or "randomforest" in model_name:
+        explainer = shap.TreeExplainer(model, X_train)
+    elif "gbm" in model_name or "gradientboosting" in model_name:
+        explainer = shap.Explainer(model, X_train)
+    elif "logistic" in model_name or "linear" in model_name:
+        explainer = shap.LinearExplainer(model, X_train)
     else:
-        raise ValueError("Choose plot_type from ['summary', 'bar']")
+        explainer = shap.Explainer(model.predict, X_train)
 
-def explain_with_lime(model, X_train, X_test, feature_names=None, sample_index=0, class_names=["Healthy", "PTSD"]):
-    """LIME explanation on a single sample"""
-    explainer = lime.lime_tabular.LimeTabularExplainer(
-        training_data=np.array(X_train),
-        feature_names=feature_names if feature_names is not None else X_train.columns,
-        class_names=class_names,
-        mode='classification'
-    )
-    
-    exp = explainer.explain_instance(
-        data_row=X_test.iloc[sample_index],
-        predict_fn=model.predict_proba
-    )
-    exp.show_in_notebook()
+    if isinstance(X_test, pd.DataFrame) and len(X_test) > 100:
+        X_test = X_test.sample(n=100, random_state=42)
 
-def plot_permutation_importance(model, X_test, y_test, feature_names=None):
-    """Sklearn's Permutation Feature Importance"""
-    result = permutation_importance(model, X_test, y_test, n_repeats=10, random_state=42, scoring='roc_auc')
-    
+    shap_values = explainer(X_test)
+
+    if hasattr(shap_values, "shape") and len(shap_values.shape) == 3:
+        shap_values_to_plot = shap_values[:, :, 1]  # PTSD class
+    else:
+        shap_values_to_plot = shap_values
+
+    plt.figure()
+    shap.summary_plot(shap_values_to_plot, X_test, show=False)
+    plt.savefig(save_path)
+    plt.close()
+
+
+def explain_with_lime(model, X_train, X_test, feature_names=None, instance_index=0):
+    from lime import lime_tabular
+    explainer = lime_tabular.LimeTabularExplainer(
+        training_data=X_train.values,
+        feature_names=feature_names or X_train.columns.tolist(),
+        mode="classification",
+        class_names=["Healthy", "PTSD"]
+    )
+    explanation = explainer.explain_instance(
+        X_test.iloc[instance_index].values,
+        model.predict_proba,
+        num_features=10
+    )
+    explanation.show_in_notebook(show_table=True)
+
+
+def plot_permutation_importance(model, X_test, y_test, feature_names):
+    result = permutation_importance(model, X_test, y_test, n_repeats=10, random_state=42, n_jobs=-1)
     sorted_idx = result.importances_mean.argsort()[::-1]
-    top_features = np.array(feature_names if feature_names is not None else X_test.columns)[sorted_idx][:20]
-    
-    plt.figure(figsize=(10, 6))
-    plt.barh(top_features[::-1], result.importances_mean[sorted_idx][:20][::-1])
-    plt.xlabel("Permutation Importance (mean decrease in ROC AUC)")
-    plt.title("Top Feature Importances")
-    plt.tight_layout()
-    plt.show()
 
-def plot_model_feature_importance(model, feature_names=None, top_n=20):
-    """For models that support .feature_importances_"""
+    plt.figure(figsize=(10, 6))
+    plt.barh(range(len(sorted_idx)), result.importances_mean[sorted_idx])
+    plt.yticks(range(len(sorted_idx)), [feature_names[i] for i in sorted_idx])
+    plt.xlabel("Permutation Importance")
+    plt.title("Permutation Feature Importance")
+    plt.tight_layout()
+    plt.savefig("results/permutation_importance.png")
+    plt.close()
+
+
+def plot_model_feature_importance(model, feature_names):
     if hasattr(model, "feature_importances_"):
         importances = model.feature_importances_
-        sorted_idx = np.argsort(importances)[::-1][:top_n]
-        names = np.array(feature_names if feature_names is not None else range(len(importances)))
-        
-        plt.figure(figsize=(10, 6))
-        plt.barh(names[sorted_idx][::-1], importances[sorted_idx][::-1])
-        plt.xlabel("Feature Importance")
-        plt.title("Model-based Feature Importances")
-        plt.tight_layout()
-        plt.show()
-    else:
-        print("Model does not support feature_importances_ attribute.")
+        sorted_idx = np.argsort(importances)[::-1]
 
-def plot_elasticnet_weights(X, y, top_k=20):
-    """Display top features selected by ElasticNet"""
-    model = ElasticNet(random_state=42)
+        plt.figure(figsize=(10, 6))
+        plt.barh(range(len(sorted_idx)), importances[sorted_idx])
+        plt.yticks(range(len(sorted_idx)), [feature_names[i] for i in sorted_idx])
+        plt.xlabel("Feature Importance")
+        plt.title("Model-Based Feature Importance")
+        plt.tight_layout()
+        plt.savefig("results/model_feature_importance.png")
+        plt.close()
+
+
+def plot_elasticnet_weights(X, y):
+    model = ElasticNetCV(cv=5, random_state=42)
     model.fit(X, y)
-    coefs = pd.Series(np.abs(model.coef_), index=X.columns)
-    top_features = coefs.sort_values(ascending=False).head(top_k)
-    
+    coef = model.coef_
+
+    sorted_idx = np.argsort(np.abs(coef))[::-1]
     plt.figure(figsize=(10, 6))
-    top_features.plot(kind='barh')
-    plt.xlabel("ElasticNet Coefficient Magnitude")
-    plt.title("Top Features from ElasticNet")
+    sns.barplot(x=np.array(X.columns)[sorted_idx], y=coef[sorted_idx])
+    plt.xticks(rotation=45, ha='right')
+    plt.title("ElasticNet Feature Coefficients")
     plt.tight_layout()
-    plt.show()
+    plt.savefig("results/elasticnet_weights.png")
+    plt.close()
