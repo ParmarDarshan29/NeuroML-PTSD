@@ -1,0 +1,5 @@
+Model,Best Parameters,Best CV Score (ROC AUC)
+RandomForest,"{'n_estimators': 199, 'max_depth': 28, 'min_samples_split': 3, 'min_samples_leaf': 2}",0.8463636363636363
+XGBoost,"{'n_estimators': 178, 'max_depth': 6, 'learning_rate': 0.2875862545506945}",0.8099999999999999
+LGBM,"{'n_estimators': 181, 'num_leaves': 135, 'learning_rate': 0.28577248286759266}",0.8087272727272727
+CatBoost,"{'iterations': 59, 'depth': 10, 'learning_rate': 0.1336062742301125}",0.8330909090909092
