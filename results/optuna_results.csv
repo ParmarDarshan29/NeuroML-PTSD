@@ -1,5 +1,5 @@
 Model,Best Parameters,Best CV Score (ROC AUC)
-RandomForest,"{'n_estimators': 53, 'max_depth': 50, 'min_samples_split': 6, 'min_samples_leaf': 4}",0.8565454545454545
-XGBoost,"{'n_estimators': 165, 'max_depth': 9, 'learning_rate': 0.2324101734745378}",0.8163636363636364
-LGBM,"{'n_estimators': 83, 'num_leaves': 58, 'learning_rate': 0.29833720769932554}",0.8138181818181819
-CatBoost,"{'iterations': 51, 'depth': 7, 'learning_rate': 0.07403699892052908}",0.8309090909090908
+RandomForest,"{'n_estimators': 131, 'max_depth': 38, 'min_samples_split': 4, 'min_samples_leaf': 2}",0.8501818181818181
+XGBoost,"{'n_estimators': 116, 'max_depth': 3, 'learning_rate': 0.2269135178662099}",0.8216363636363635
+LGBM,"{'n_estimators': 112, 'num_leaves': 37, 'learning_rate': 0.13115619021310015}",0.8083636363636364
+CatBoost,"{'iterations': 73, 'depth': 7, 'learning_rate': 0.06670815905044561}",0.8361818181818181

@@ -87,8 +87,12 @@ def plot_elasticnet_weights(X, y):
     coef = model.coef_
 
     sorted_idx = np.argsort(np.abs(coef))[::-1]
+    feature_names = np.array(X.columns)[sorted_idx]
+    sorted_coef = coef[sorted_idx]
+    colors = ['green' if val > 0 else 'red' for val in sorted_coef]
+
     plt.figure(figsize=(10, 6))
-    sns.barplot(x=np.array(X.columns)[sorted_idx], y=coef[sorted_idx])
+    sns.barplot(x=feature_names, y=sorted_coef, palette=colors)
     plt.xticks(rotation=45, ha='right')
     plt.title("ElasticNet Feature Coefficients")
     plt.tight_layout()

@@ -1,8 +1,0 @@
-Model,Mean AUC,Mean Accuracy,P-Value,Best Params
-SVC,0.7118181818181819,0.6838095238095236,0.0,"{'C': 1, 'gamma': 'scale', 'kernel': 'rbf'}"
-KNN,0.7217272727272728,0.7033333333333334,0.0,"{'n_neighbors': 5, 'weights': 'uniform'}"
-RandomForest,0.7566363636363638,0.6742857142857142,0.0,"{'max_features': 'sqrt', 'n_estimators': 50}"
-AdaBoost,0.6234545454545455,0.5952380952380952,0.0,"{'learning_rate': 1, 'n_estimators': 200}"
-XGB,0.7243636363636364,0.6738095238095239,0.0,"{'learning_rate': 0.2, 'max_depth': 3, 'n_estimators': 200}"
-LGBM,0.7083636363636364,0.7119047619047618,0.0,"{'learning_rate': 0.2, 'n_estimators': 100}"
-CatBoost,0.7732727272727272,0.7404761904761904,0.0,"{'depth': 5, 'iterations': 100, 'learning_rate': 0.01}"
