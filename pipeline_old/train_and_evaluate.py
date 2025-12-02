@@ -3,7 +3,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.utils import shuffle
 import numpy as np
 import pandas as pd
-from .feature_selection import select_features
+from ..src.feature_selection import select_features
 from .model_registry import get_models, get_param_grids
 from .config import N_SPLITS, RANDOM_STATE
 

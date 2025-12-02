@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from .feature_selection import select_features
 from .model_registry import get_models, get_param_grids
-from .config import N_SPLITS, RANDOM_STATE
+from ..pipeline.config import N_SPLITS, RANDOM_STATE
 from .bayesian_optimization import optimize_with_bayes
 
 def cross_validate_and_train(X, y):

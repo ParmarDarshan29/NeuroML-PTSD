@@ -1,0 +1,8 @@
+{
+	"DATA_PATH": "../data/EEG_data.csv",
+    "PRE_DATA_PATH": "../data/pre_data_PTSD.csv",
+	"RANDOM_STATE": 42,
+	"N_SPLITS": 10,
+	"TOP_FEATURES": 20,
+	"SEED": 2025
+}

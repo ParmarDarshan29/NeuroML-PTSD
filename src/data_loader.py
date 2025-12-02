@@ -1,5 +1,5 @@
 import pandas as pd
-from .config import DATA_PATH
+from ..pipeline.config import DATA_PATH
 
 def load_and_preprocess():
     df = pd.read_csv(DATA_PATH)

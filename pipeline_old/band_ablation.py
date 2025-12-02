@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from collections import defaultdict
 from itertools import combinations
-from lightgbm import LGBMClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
@@ -21,9 +21,7 @@ from sklearn.metrics import roc_auc_score
 repo_root = Path(__file__).parent.parent
 sys.path.append(str(repo_root / 'pipeline'))
 
-import config as cfg
-
-
+import pipeline.config as cfg
 
 df = pd.read_csv(repo_root / cfg.DATA_PATH)
 # Filter to only the two target classes
@@ -63,7 +61,6 @@ for band1, band2 in combinations(band_cols.keys(), 2):
 random_state = 42
 n_splits = 10
 cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
-best_params = dict(n_estimators=100, learning_rate=0.05, num_leaves=31, random_state=random_state)
 y = df['specific.disorder'].map({'Healthy control': 0, 'Posttraumatic stress disorder': 1})
 results = []
 for band, cols in band_cols.items():
@@ -72,7 +69,7 @@ for band, cols in band_cols.items():
     for train_idx, test_idx in cv.split(X_band, y):
         X_tr, X_te = X_band.iloc[train_idx], X_band.iloc[test_idx]
         y_tr, y_te = y.iloc[train_idx], y.iloc[test_idx]
-        model = LGBMClassifier(**best_params)
+        model = RandomForestClassifier()
         model.fit(X_tr, y_tr)
         y_pred = model.predict_proba(X_te)[:, 1]
         auc = roc_auc_score(y_te, y_pred)
